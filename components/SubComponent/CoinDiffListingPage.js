@@ -1,18 +1,30 @@
 import Config from "@/utils/Config"
 import { useState, useEffect } from "react"
 import { GetBinanceCoinsList } from "../apis/binance_apis/GetBinanceCoinsList"
+import { GetWazrixCoinsPrice } from "../apis/wazrix_apis/GetWazrixCoinPrice"
 import { GetWazrixCoinsList } from "../apis/wazrix_apis/GetWazrixCoinsList"
 
 export default function CoinDifferenceListing(props) {
     // states 
     let [tds, setTDS] = useState(0.01)
-    let [wazrixUSDTPrice, setWazrixUSDTPrice] = useState(84.50)
+    let [wazrixUSDTPrice, setWazrixUSDTPrice] = useState(87.30)
     let [portfolioPrice, setPortfolioPrice] = useState(100000)
     let [priceDiffList, setPriceDiffList] = useState([])
     let [isReverseCalculationEnabled, setIsReverseCalculationEnabled] = useState(false)
 
     // function for get price list
     let getPriceList = async () => {
+
+        // getting wazrix usdt price
+        let wazrixRes = await GetWazrixCoinsPrice(props, 'usdtinr')
+
+        if (wazrixRes && wazrixRes.bidPrice) {
+            setWazrixUSDTPrice(parseFloat(wazrixRes.bidPrice))
+        }
+        else {
+            setWazrixUSDTPrice(parseFloat(Config.defaultWazrixUSDTPrice))
+        }
+
         // getting binance price list
         let binanceResponse = await GetBinanceCoinsList()
         let tempBinanceList = []
@@ -58,16 +70,18 @@ export default function CoinDifferenceListing(props) {
                     let wazrixSellPrice = purchasedCoin * parseFloat(wazrixCoin.bidPrice)
                     let priceDiff = (wazrixSellPrice - wazrixSellPrice * tds) - wazrixUsdt * wazrixUSDTPrice
 
-                    let priceDiffElement =
-                    {
-                        coinName: wazrixCoin.baseAsset.toUpperCase(),
-                        currency: 'INR',
-                        wazrixPrice: wazrixCoin.lastPrice,
-                        binancePrice: tempBinanceList[binanceIndex].lastPrice,
-                        priceDifference: priceDiff
-                    }
+                    if (isFinite(priceDiff) && priceDiff > 0) {
+                        let priceDiffElement =
+                        {
+                            coinName: wazrixCoin.baseAsset.toUpperCase(),
+                            currency: 'INR',
+                            wazrixPrice: wazrixCoin.lastPrice,
+                            binancePrice: tempBinanceList[binanceIndex].lastPrice,
+                            priceDifference: priceDiff
+                        }
 
-                    tempPriceDiffList.push(priceDiffElement)
+                        tempPriceDiffList.push(priceDiffElement)
+                    }
                 }
             }
 
@@ -79,6 +93,17 @@ export default function CoinDifferenceListing(props) {
 
     // function for reverse calculation
     let getReversePriceList = async () => {
+
+        // getting wazrix usdt price
+        let wazrixRes = await GetWazrixCoinsPrice(props, 'usdtinr')
+
+        if (wazrixRes && wazrixRes.bidPrice) {
+            setWazrixUSDTPrice(parseFloat(wazrixRes.bidPrice))
+        }
+        else {
+            setWazrixUSDTPrice(parseFloat(Config.defaultWazrixUSDTPrice))
+        }
+
         // getting binance price list
         let binanceResponse = await GetBinanceCoinsList()
         let tempBinanceList = []
@@ -123,16 +148,18 @@ export default function CoinDifferenceListing(props) {
                     priceDiff = priceDiff * wazrixUSDTPrice
                     priceDiff = (priceDiff - priceDiff * tds) - portfolioPrice
 
-                    let priceDiffElement =
-                    {
-                        coinName: wazrixCoin.baseAsset.toUpperCase(),
-                        currency: 'INR',
-                        wazrixPrice: wazrixCoin.lastPrice,
-                        binancePrice: tempBinanceList[binanceIndex].lastPrice,
-                        priceDifference: priceDiff
-                    }
+                    if (isFinite(priceDiff) && priceDiff > 0) {
+                        let priceDiffElement =
+                        {
+                            coinName: wazrixCoin.baseAsset.toUpperCase(),
+                            currency: 'INR',
+                            wazrixPrice: wazrixCoin.lastPrice,
+                            binancePrice: tempBinanceList[binanceIndex].lastPrice,
+                            priceDifference: priceDiff
+                        }
 
-                    tempPriceDiffList.push(priceDiffElement)
+                        tempPriceDiffList.push(priceDiffElement)
+                    }
                 }
             }
 
@@ -142,39 +169,27 @@ export default function CoinDifferenceListing(props) {
 
     useEffect(() => {
         if (Config.apiCallTime > 0) {
-            if(isReverseCalculationEnabled)
-            {
-                if(priceDiffList.length <= 0)
-            {
-                getReversePriceList()
-            }
-            else
-            {
+            if (isReverseCalculationEnabled) {
+
                 let interval = setInterval(async () => {
                     await getReversePriceList()
                 }, Config.apiCallTime)
-    
+
                 return () => {
                     clearInterval(interval)
                 }
+
             }
-            }
-            else
-            {
-                if(priceDiffList.length <= 0)
-            {
-                getPriceList()
-            }
-            else
-            {
+            else {
+
                 let interval = setInterval(async () => {
                     await getPriceList()
                 }, Config.apiCallTime)
-    
+
                 return () => {
                     clearInterval(interval)
                 }
-            }
+
             }
         }
     }, [isReverseCalculationEnabled])
@@ -182,104 +197,98 @@ export default function CoinDifferenceListing(props) {
     return (
         <section className={'content'}>
             <div className={'container-fluid'}>
-                <div className={'row'}>
-                    <div className={'col-md-12'}>
-                        <div className={'card'}>
-                            <div className={'card-header bg-secondary'}>
-                                <h5 className={'card-title text-white'} style={{ maxHeight: '20px' }}>Filters</h5>
-                            </div>
-                            <div className={'card-body'}>
-                                <div className={'row'}>
-                                    <div className={'col-md-3'}>
-                                        <div className={'form-group'}>
-                                            <label htmlFor="exampleInput1"> Coin Name</label>
-                                            <input className={'form-control'} type={'text'} placeholder={'Coin Name'}
-                                            // value={tempCoin}
-                                            // onChange={(e) => {
-                                            //     setTempCoin(e.currentTarget.value)
-                                            // }}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className={'col-md-3'}>
-                                        <div className={'form-group'}>
-                                            <label htmlFor="exampleInput1"> Currency</label>
-                                            <select className={'form-control'}
-                                            // value={tempShowPair}
-                                            // onChange={(e) => {
-                                            //     setTempShowPair(e.currentTarget.value)
-                                            // }}
-                                            >
-                                                <option value={''}>All</option>
-                                                <option value={'inr'}>INR</option>
-                                                <option value={'usdt'}>USDT</option>
-                                                <option value={'btc'}>BTC</option>
-                                                <option value={'wrx'}>WRX</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                <div className={'card'}>
+                    <div className={'card-header bg-primary text-light font-weight-bold'}>
+                        Filters
+                    </div>
+                    <div className={'card-body'}>
+                        <div className={'row'}>
+                            <div className={'col-md-3'}>
+                                <div className={'form-group'}>
+                                    <label htmlFor="exampleInput1"> Coin Name</label>
+                                    <input className={'form-control'} type={'text'} placeholder={'Coin Name'}
+                                    // value={tempCoin}
+                                    // onChange={(e) => {
+                                    //     setTempCoin(e.currentTarget.value)
+                                    // }}
+                                    />
                                 </div>
-                                <div className={'row'}>
-                                    <div className={'col-md-12'}>
-                                        <button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button>
-                                        <button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-2'}>Clear Filter</button>
-                                        <button onClick={async (e) => {
-                                            if(isReverseCalculationEnabled)
-                                            {
-                                                setIsReverseCalculationEnabled(false)
-                                            }
-                                            else 
-                                            {
-                                                setIsReverseCalculationEnabled(true)
-                                            }
-                                        }} className={isReverseCalculationEnabled ? 'btn btn-danger ml-2' : 'btn btn-primary ml-2'}>Reverse Calculation</button>
-                                    </div>
+                            </div>
+
+                            <div className={'col-md-3'}>
+                                <div className={'form-group'}>
+                                    <label htmlFor="exampleInput1"> Currency</label>
+                                    <select className={'form-control'}
+                                    // value={tempShowPair}
+                                    // onChange={(e) => {
+                                    //     setTempShowPair(e.currentTarget.value)
+                                    // }}
+                                    >
+                                        <option value={''}>All</option>
+                                        <option value={'inr'}>INR</option>
+                                        <option value={'usdt'}>USDT</option>
+                                        <option value={'btc'}>BTC</option>
+                                        <option value={'wrx'}>WRX</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
-
-                        <div className={'card card-primary mt-2'}>
-                            <div className={'card-header bg-secondary'}>
-                                <h5 className={'card-title text-white'}>Coins List</h5>
-                            </div>
-                            <div className={'card-body'}>
-                                <div className={'row'}>
-                                    <div className={'col-md-12'}>
-                                        <table className={'table table-bordered'}>
-                                            <thead>
-                                                <tr>
-                                                    <th>Coin Name</th>
-                                                    <th>Currency</th>
-                                                    <th>Wazrix Price</th>
-                                                    <th>Binance Price</th>
-                                                    <th>Difference INR</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    priceDiffList && priceDiffList.length > 0
-                                                        ?
-                                                        priceDiffList.map((element, key) => {
-                                                            return (
-                                                                <tr key={key}>
-                                                                    <th className={'text-primary'}>{element && element.coinName ? element.coinName.toUpperCase() : ''}</th>
-                                                                    <th className={'text-info'}>{element && element.currency ? element.currency.toUpperCase() : ''}</th>
-                                                                    <th>{element && element.wazrixPrice ? element.wazrixPrice : ''}</th>
-                                                                    <th>{element && element.binancePrice ? element.binancePrice : ''}</th>
-                                                                    <th className={element.priceDifference >= 0 ? 'text-success' : 'text-danger'}>{element && element.priceDifference ? element.priceDifference.toFixed(2) : ''}</th>
-                                                                </tr>
-                                                            )
-                                                        })
-                                                        :
-                                                        <></>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                        <div className={'row'}>
+                            <div className={'col-md-12'}>
+                                <button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button>
+                                <button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-1'}>Clear Filter</button>
+                                <button onClick={async (e) => {
+                                    if (isReverseCalculationEnabled) {
+                                        setPriceDiffList([])
+                                        setIsReverseCalculationEnabled(false)
+                                    }
+                                    else {
+                                        setPriceDiffList([])
+                                        setIsReverseCalculationEnabled(true)
+                                    }
+                                }} className={isReverseCalculationEnabled ? 'btn btn-danger ml-1' : 'btn btn-primary ml-1'}>Rev Cal</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div className={'card card-primary mt-2'}>
+                    <div className={'card-header bg-danger text-light font-weight-bold'}>
+                        Coins List
+                    </div>
+                    <div className={'card-body table-responsive p-0'}>
+                        <table className={'table table-bordered table-striped overflow-auto'}>
+                            <thead>
+                                <tr>
+                                    <th>Coin Name</th>
+                                    <th>Difference INR</th>
+                                    <th>Currency</th>
+                                    <th>Wazrix Price</th>
+                                    <th>Binance Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    priceDiffList && priceDiffList.length > 0
+                                        ?
+                                        priceDiffList.map((element, key) => {
+                                            if (element.priceDifference > 0) {
+                                                return (
+                                                    <tr key={key}>
+                                                        <th className={'text-primary'}>{element && element.coinName ? element.coinName.toUpperCase() : ''}</th>
+                                                        <th className={element.priceDifference >= 0 ? 'text-success' : 'text-danger'}>{element && element.priceDifference ? element.priceDifference.toFixed(2) : ''}</th>
+                                                        <th className={'text-info'}>{element && element.currency ? element.currency.toUpperCase() : ''}</th>
+                                                        <th className={'text-primary'}>{element && element.wazrixPrice ? element.wazrixPrice : ''}</th>
+                                                        <th className={'text-danger'}>{element && element.binancePrice ? element.binancePrice : ''}</th>
+                                                    </tr>
+                                                )
+                                            }
+                                        })
+                                        :
+                                        <></>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

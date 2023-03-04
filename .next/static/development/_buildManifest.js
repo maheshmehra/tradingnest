@@ -1,0 +1,1 @@
+self.__BUILD_MANIFEST = {__rewrites:{beforeFiles:[],afterFiles:[{source:"\u002Fmarket\u002FallTickers"}],fallback:[]},"/_error":["static\u002Fchunks\u002Fpages\u002F_error.js"],"/price_difference":["static\u002Fchunks\u002Fpages\u002Fprice_difference.js"],sortedPages:["\u002F_app","\u002F_error","\u002Fprice_difference"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
