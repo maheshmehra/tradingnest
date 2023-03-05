@@ -2,5 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/price_difference": "pages/price_difference.js"
+  "/binance_kucoin_diff": "pages/binance_kucoin_diff.js",
+  "/binance_price": "pages/binance_price.js"
 }

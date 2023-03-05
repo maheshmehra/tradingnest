@@ -246,7 +246,7 @@ export default function CoinDiffBinanceGateIOListingPage(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className={'row'}>
+                        <div className={'row mt-2'}>
                             <div className={'col-md-12'}>
                                 {/* <button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button> */}
                                 {/* <button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-2'}>Clear Filter</button> */}

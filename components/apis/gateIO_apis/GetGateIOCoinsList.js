@@ -1,7 +1,9 @@
+import Config from "@/utils/Config";
+
 export async function GetGateIOCoinsList(props)
 {
     try {
-        let response = await fetch('https://api.gateio.ws/api/v4/spot/tickers', {
+        let response = await fetch(Config[process.env.NODE_ENV].HttpUrl + '/api/v4/spot/tickers?exchange=gateio', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

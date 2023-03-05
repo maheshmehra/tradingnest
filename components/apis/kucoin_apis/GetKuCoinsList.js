@@ -1,7 +1,9 @@
+import Config from "@/utils/Config";
+
 export async function GetKuCoinsList(props)
 {
     try {
-        let response = await fetch('http://localhost:3000/market/allTickers', {
+        let response = await fetch(Config[process.env.NODE_ENV].HttpUrl + '/api/v1/market/allTickers?exchange=kucoin', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -25,10 +25,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/price_difference": [
+    "/binance_kucoin_diff": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/price_difference.js"
+      "static/chunks/pages/binance_kucoin_diff.js"
+    ],
+    "/binance_price": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/binance_price.js"
     ]
   },
   "ampFirstPages": []

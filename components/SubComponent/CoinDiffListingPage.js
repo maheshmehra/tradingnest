@@ -233,11 +233,11 @@ export default function CoinDifferenceListing(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className={'row'}>
+                        <div className={'row mt-2'}>
                             <div className={'col-md-12'}>
                                 <button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button>
-                                <button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-1'}>Clear Filter</button>
-                                <button onClick={async (e) => {
+                                &nbsp;<button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-1'}>Clear Filter</button>
+                                &nbsp;<button onClick={async (e) => {
                                     if (isReverseCalculationEnabled) {
                                         setPriceDiffList([])
                                         setIsReverseCalculationEnabled(false)
