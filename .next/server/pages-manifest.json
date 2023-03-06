@@ -3,5 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/binance_kucoin_diff": "pages/binance_kucoin_diff.js",
-  "/binance_price": "pages/binance_price.js"
+  "/kucoin_gateio_diff": "pages/kucoin_gateio_diff.js"
 }

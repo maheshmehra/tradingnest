@@ -3,9 +3,11 @@ import { useState, useEffect } from "react"
 import { GetBinanceCoinsList } from "../apis/binance_apis/GetBinanceCoinsList"
 import { GetWazrixCoinsPrice } from "../apis/wazrix_apis/GetWazrixCoinPrice"
 import { GetWazrixCoinsList } from "../apis/wazrix_apis/GetWazrixCoinsList"
+import LoadingScreen from "@/components/Modals/LoadingScreen";
 
 export default function CoinDifferenceListing(props) {
-    // states 
+    // states
+    let [showLoader, setShowLoader] = useState(true)
     let [tds, setTDS] = useState(0.01)
     let [wazrixUSDTPrice, setWazrixUSDTPrice] = useState(87.30)
     let [portfolioPrice, setPortfolioPrice] = useState(100000)
@@ -14,7 +16,6 @@ export default function CoinDifferenceListing(props) {
 
     // function for get price list
     let getPriceList = async () => {
-
         // getting wazrix usdt price
         let wazrixRes = await GetWazrixCoinsPrice(props, 'usdtinr')
 
@@ -88,7 +89,11 @@ export default function CoinDifferenceListing(props) {
             setPriceDiffList(tempPriceDiffList)
         }
 
-
+        // deactivating loader
+        if(showLoader)
+        {
+            setShowLoader(false)
+        }
     }
 
     // function for reverse calculation
@@ -165,6 +170,11 @@ export default function CoinDifferenceListing(props) {
 
             setPriceDiffList(tempPriceDiffList)
         }
+
+        if(showLoader)
+        {
+            setShowLoader(false)
+        }
     }
 
     useEffect(() => {
@@ -172,6 +182,7 @@ export default function CoinDifferenceListing(props) {
             if (isReverseCalculationEnabled) {
 
                 let interval = setInterval(async () => {
+                    // calling function
                     await getReversePriceList()
                 }, Config.apiCallTime)
 
@@ -183,6 +194,7 @@ export default function CoinDifferenceListing(props) {
             else {
 
                 let interval = setInterval(async () => {
+                    // calling function
                     await getPriceList()
                 }, Config.apiCallTime)
 
@@ -196,7 +208,7 @@ export default function CoinDifferenceListing(props) {
 
     return (
         <section className={'content'}>
-            <div className={'container-fluid'}>
+            <div className={!showLoader ? 'container-fluid showAnimator' : 'container-fluid hideAnimator'}>
                 <div className={'card'}>
                     <div className={'card-header bg-primary text-light font-weight-bold'}>
                         Filters
@@ -235,14 +247,16 @@ export default function CoinDifferenceListing(props) {
                         </div>
                         <div className={'row mt-2'}>
                             <div className={'col-md-12'}>
-                                <button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button>
-                                &nbsp;<button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-1'}>Clear Filter</button>
-                                &nbsp;<button onClick={async (e) => {
+                                {/*<button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button>*/}
+                                {/*&nbsp;<button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-1'}>Clear Filter</button>*/}
+                                <button onClick={async (e) => {
                                     if (isReverseCalculationEnabled) {
+                                        setShowLoader(true)
                                         setPriceDiffList([])
                                         setIsReverseCalculationEnabled(false)
                                     }
                                     else {
+                                        setShowLoader(true)
                                         setPriceDiffList([])
                                         setIsReverseCalculationEnabled(true)
                                     }
@@ -292,6 +306,7 @@ export default function CoinDifferenceListing(props) {
                     </div>
                 </div>
             </div>
+            <LoadingScreen showAnimator={showLoader}/>
         </section>
     )
 }

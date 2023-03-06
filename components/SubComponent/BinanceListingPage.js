@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { GetBinanceCoinsList } from "../apis/binance_apis/GetBinanceCoinsList"
 import Config from "../../utils/Config"
+import LoadingScreen from "@/components/Modals/LoadingScreen";
 
 export default function BinanceListingPage(props) {
     // states
-    let [showLoader, setShowLoader] = useState(false)
+    let [showLoader, setShowLoader] = useState(true)
     let [coinsList, setCoinsList] = useState([])
     let [showPair, setShowPair] = useState('')
     let [tempShowPair, setTempShowPair] = useState('')
@@ -13,27 +14,16 @@ export default function BinanceListingPage(props) {
 
     // function for get binance coins data
     let getBinanceCoinsList = async () => {
-
-        if (!coinsList && coinsList.length <= 0) {
-            setShowLoader(true)
-        }
-
+        // getting data from api
         let response = await GetBinanceCoinsList()
 
         if (Array.isArray(response)) {
             setCoinsList(response)
         }
 
-        if (!coinsList && coinsList.length <= 0) {
+        if (showLoader) {
             setShowLoader(false)
         }
-    }
-
-    // function for change filter
-    let changeFilter = async (e) => {
-        e.preventDefault()
-        await setShowPair(tempShowPair)
-        await setCoin(tempCoin)
     }
 
     // function for clear filter
@@ -43,6 +33,8 @@ export default function BinanceListingPage(props) {
         await setCoin('')
         await setTempCoin('')
         await setTempShowPair('')
+        await setShowPair(tempShowPair)
+        await setCoin(tempCoin)
     }
 
     useEffect(() => {
@@ -59,7 +51,7 @@ export default function BinanceListingPage(props) {
 
     return (
         <section className={'content'}>
-            <div className={'container-fluid'}>
+            <div className={!showLoader ? 'container-fluid showAnimator' : 'container-fluid hideAnimator'}>
                 <div className={'card'}>
                     <div className={'card-header bg-primary text-light font-weight-bold'}>
                         Filters
@@ -98,7 +90,7 @@ export default function BinanceListingPage(props) {
                         </div>
                         <div className={'row mt-2'}>
                             <div className={'col-md-12'}>
-                                <button onClick={async (e) => await changeFilter(e)} className={'btn btn-primary'}>Search</button>
+                                <button className={'btn btn-primary'}>Search</button>
                                 &nbsp;<button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-2'}>Clear Filter</button>
                             </div>
                         </div>
@@ -145,6 +137,7 @@ export default function BinanceListingPage(props) {
                     </div>
                 </div>
             </div>
+            <LoadingScreen showAnimator={showLoader}/>
         </section>
     )
 }

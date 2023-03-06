@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
 import { GetWazrixCoinsList } from "../apis/wazrix_apis/GetWazrixCoinsList"
 import Config from "../../utils/Config"
+import LoadingScreen from "@/components/Modals/LoadingScreen";
 
 export default function WazrixListingPage(props) {
     // states
+    let [showAnimator, setShowAnimator] = useState(true)
     let [coinsList, setCoinsList] = useState([])
     let [showPair, setShowPair] = useState('')
     let [tempShowPair, setTempShowPair] = useState('')
@@ -17,13 +19,11 @@ export default function WazrixListingPage(props) {
         if (Array.isArray(response)) {
             setCoinsList(response)
         }
-    }
 
-    // function for change filter
-    let changeFilter = async (e) => {
-        e.preventDefault()
-        await setShowPair(tempShowPair)
-        await setCoin(tempCoin)
+        if(showAnimator)
+        {
+            setShowAnimator(false)
+        }
     }
 
     // function for clear filter
@@ -33,6 +33,8 @@ export default function WazrixListingPage(props) {
         await setCoin('')
         await setTempCoin('')
         await setTempShowPair('')
+        await setShowPair(tempShowPair)
+        await setCoin(tempCoin)
     }
 
     useEffect(() => {
@@ -49,7 +51,7 @@ export default function WazrixListingPage(props) {
 
     return (
         <section className={'content'}>
-            <div className={'container-fluid'}>
+            <div className={!showAnimator ? 'container-fluid showAnimator' : 'container-fluid hideAnimator'}>
                 <div className={'card'}>
                     <div className={'card-header bg-primary text-light font-weight-bold'}>
                     Filters
@@ -135,6 +137,7 @@ export default function WazrixListingPage(props) {
                     </div>
                 </div>
             </div>
+            <LoadingScreen showAnimator={showAnimator}/>
         </section>
     )
 }

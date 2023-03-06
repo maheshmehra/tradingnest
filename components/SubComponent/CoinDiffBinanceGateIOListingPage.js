@@ -3,9 +3,11 @@ import { useState, useEffect } from "react"
 import { GetBinanceCoinsList } from "../apis/binance_apis/GetBinanceCoinsList"
 import { GetGateIOCoinsList } from "../apis/gateIO_apis/GetGateIOCoinsList"
 import { GetWazrixCoinsPrice } from "../apis/wazrix_apis/GetWazrixCoinPrice"
+import LoadingScreen from "@/components/Modals/LoadingScreen";
 
 export default function CoinDiffBinanceGateIOListingPage(props) {
     // states
+    let [showAnimator, setShowAnimator] = useState(true)
     let [wazrixUSDTPrice, setWazrixUSDTPrice] = useState(87.30)
     let [portfolioPrice, setPortfolioPrice] = useState(100000)
     let [priceDiffList, setPriceDiffList] = useState([])
@@ -94,6 +96,11 @@ export default function CoinDiffBinanceGateIOListingPage(props) {
 
             setPriceDiffList(tempPriceDiffList)
         }
+
+        if(showAnimator)
+        {
+            setShowAnimator(false)
+        }
     }
 
     // reverse calculation
@@ -179,6 +186,11 @@ export default function CoinDiffBinanceGateIOListingPage(props) {
 
             setPriceDiffList(tempPriceDiffList)
         }
+
+        if(showAnimator)
+        {
+            setShowAnimator(false)
+        }
     }
 
 
@@ -209,7 +221,7 @@ export default function CoinDiffBinanceGateIOListingPage(props) {
     // returning html
     return (
         <section className={'content'}>
-            <div className={'container-fluid'}>
+            <div className={!showAnimator ? 'container-fluid showAnimator' : 'container-fluid hideAnimator'}>
                 <div className={'card'}>
                     <div className={'card-header bg-primary text-light font-weight-bold'}>
                         Filters
@@ -252,10 +264,12 @@ export default function CoinDiffBinanceGateIOListingPage(props) {
                                 {/* <button onClick={async (e) => await clearFilter(e)} className={'btn btn-primary ml-2'}>Clear Filter</button> */}
                                 <button onClick={async (e) => {
                                     if (isReverseCalculationEnabled) {
+                                        setShowAnimator(true)
                                         setPriceDiffList([])
                                         setIsReverseCalculationEnabled(false)
                                     }
                                     else {
+                                        setShowAnimator(true)
                                         setPriceDiffList([])
                                         setIsReverseCalculationEnabled(true)
                                     }
@@ -305,6 +319,7 @@ export default function CoinDiffBinanceGateIOListingPage(props) {
                     </div>
                 </div>
             </div>
+            <LoadingScreen showAnimator={showAnimator}/>
         </section>
     )
 }

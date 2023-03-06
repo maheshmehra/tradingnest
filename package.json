@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "proxy": "https://api.binance.com/api/v3"
+    "lint": "next lint"
   },
   "dependencies": {
     "@next/font": "13.1.6",
